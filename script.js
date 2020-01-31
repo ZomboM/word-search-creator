@@ -1,9 +1,28 @@
 const maxSvgWidth = 500,
       maxSvgHeight = 350;
 
+const range = n => Array(n).fill(0).map((z, i) => i);
+
 
 const puzzle = {
   state: 'wizard',
+};
+
+const board = puzzle.board = {
+  width: 10,
+  height: 10,
+  squares: null;
+  inBounds(c) {
+    return c.x >= 0 && c.x < this.width &&
+           c.y >= 0 && c.y < this.height;
+  },
+  squareEmpty(c) {
+    return this.inBounds(c) && 
+      this.squares[c.x][c.y].letter === null;
+  },
+  getSquare(c) {
+    return this.squares[c.x][c.y];
+  },
 };
 
 
@@ -29,35 +48,65 @@ const hide = elem => {
   elem.attr('data-display', elem.style.display);
   elem.style.display = 'none';
 };
-const maxLen = strs => Math.max(...strs.map(w => w.length));
-const range = n => Array(n).fill(0).map((z, i) => i);
 
-const directions = [
-  { dx:  1, dy:  0 },  // east
-  { dx:  1, dy:  1 },  // south-east
-  { dx:  0, dy:  1 },  // south
-  { dx: -1, dy:  1 },  // south-west
-  { dx: -1, dy:  0 },  // west
-  { dx: -1, dy: -1 },  // north-west
-  { dx:  0, dy: -1 },  // north
-  { dx:  1, dy: -1 },  // north-east
+const dirDeltas = [
+  { x:  1, y:  0 },  // east
+  { x:  1, y:  1 },  // south-east
+  { x:  0, y:  1 },  // south
+  { x: -1, y:  1 },  // south-west
+  { x: -1, y:  0 },  // west
+  { x: -1, y: -1 },  // north-west
+  { x:  0, y: -1 },  // north
+  { x:  1, y: -1 },  // north-east
 ];
 
+const placingData = puzzle.placingData = {
+  wordData: null,
+  direction: 0,
+  startSquare: null,
+  wheelPrimed: true,
+  dirDelta() {
+    return dirDeltas[this.direction];
+  },
+  nextCoord(c) {
+    const dd = this.dirDelta();
+    return {
+      x: c.x + dd.x,
+      y: c.y + dd.y,
+    };
+  },
+  // Places the letters on the grid squares, and styles
+  // them accordingly
+  place() {
+    const startAcc = {
+      fitsSoFar: true,
+      square: this.startSquare,
+    };
+    this.wordData.ltrData.reduce((acc, ltrD) => {
+      if (acc.fitsSoFar) {
+        const c = this.nextCoord(acc.square.c);
+        const fitsSoFar = board.squareEmpty(c);
 
-// check whether or not a grid square is valid and empty
-const squareEmpty = c =>
-  c.x >= 0 && c.x < puzzle.width &&
-  c.y >= 0 && c.y < puzzle.height &&
-  puzzle.grid[c.x][c.y].letter === null;
+          return {
+            fitsSoFar: false,
+            square: null,
+          }
+        }
+
+
+        }
+        return {
+          fits,
+          square: fits ?
+        };
+      }
+    }, { fits: true,});
+  },
+};
 
 // check whether or not the current word fits into the grid
 // starting at the current square
 const wordFits = pld => {
-  const ltrElem = pld.curSquare;
-  const x = ltrElem.getAttribute('data-x') - 0,
-        y = ltrElem.getAttribute('data-y') - 0;
-  const wordData = pld.wordData,
-        word = wordData.word;
   const {dx, dy} = directions[pld.direction];
 
   return word.split('').map((ltr, ltrNum) => {
@@ -204,14 +253,6 @@ const createSearch = () => {
           'alignment-baseline': 'middle',
         }).text(ltr);
       }),
-    };
-    const initPlacingData = () => {
-      return {
-        wordData,
-        direction: 0,
-        curElem: null,
-        wheelPrimed: true,
-      };
     };
     wordData.span.node().addEventListener('click', () => {
       console.log(`click on word "${word}"`);
