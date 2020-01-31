@@ -22,23 +22,21 @@ elemIds.forEach(id => {
   e[id] = getElem(id);
 });
 
-
 const show = elem => elem.style.display = 'block';
 const hide = elem => elem.style.display = 'none';
 const maxLen = words => Math.max(...words.map(w => w.length));
 const range = n => Array(n).fill(0).map((z, i) => i);
 
-const dirDeltas = {
-  E:  { dx:  1, dy:  0 },
-  SE: { dx:  1, dy:  1 },
-  S:  { dx:  0, dy:  1 },
-  SW: { dx: -1, dy:  1 },
-  W:  { dx: -1, dy:  0 },
-  NW: { dx: -1, dy: -1 },
-  N:  { dx:  0, dy: -1 },
-  NE: { dx:  1, dy: -1 },
-};
-const directions = Object.keys(dirDeltas);
+const directions = [
+  { dx:  1, dy:  0 },  // east
+  { dx:  1, dy:  1 },  // south-east
+  { dx:  0, dy:  1 },  // south
+  { dx: -1, dy:  1 },  // south-west
+  { dx: -1, dy:  0 },  // west
+  { dx: -1, dy: -1 },  // north-west
+  { dx:  0, dy: -1 },  // north
+  { dx:  1, dy: -1 },  // north-east
+];
 
 
 // check whether or not a grid square is valid and empty
@@ -50,13 +48,12 @@ const squareEmpty = (ltrX, ltrY) =>
 // check whether or not the current word fits into the grid
 // starting at the current square
 const wordFits = pld => {
-  const ltrElem = pld.curMouseElem;
+  const ltrElem = pld.curElem;
   const x = ltrElem.getAttribute('data-x') - 0,
         y = ltrElem.getAttribute('data-y') - 0;
-  const wordData = puzzle.wordData[pld.wordNum],
+  const wordData = pld.wordData,
         word = wordData.word;
-  const dx = dirDeltas[pld.direction].dx,
-        dy = dirDeltas[pld.direction].dy;
+  const {dx, dy} = directions[pld.direction];
 
   return word.split('').map((ltr, ltrNum) => {
     // which grid square will this letter be on?
@@ -67,25 +64,26 @@ const wordFits = pld => {
 };
 
 const changePlacing = pld => {
-  const ltrElem = pld.curMouseElem;
+  const ltrElem = pld.curElem;
   const x = ltrElem.getAttribute('data-x') - 0,
         y = ltrElem.getAttribute('data-y') - 0;
-  const wordData = puzzle.wordData[pld.wordNum],
+  const wordData = pld.wordData,
         word = wordData.word;
-  const dx = dirDeltas[pld.direction].dx,
-        dy = dirDeltas[pld.direction].dy;
+  const {dx, dy} = directions[pld.direction];
 
   //console.log(`  word is ${word}, direction: ${pld.direction}`);
   const fits = wordFits(pld);
-  console.log('  ' + (fits ? 'fits!' : 'doesn\'t fit'));
+  //console.log('  ' + (fits ? 'fits!' : 'doesn\'t fit'));
 
   // style the letter elements appropriately
   wordData.ltrElems.forEach((ltrElem, ltrNum) => {
-    const ltrX = x + ltrNum * dx;
-    const ltrY = y + ltrNum * dy;
+    const ltrX = x + ltrNum * dx,
+          ltrY = y + ltrNum * dy,
+          scale = puzzle.scale,
+          offset = puzzle.offset;
     ltrElem.attrs({
-      x: Math.floor(puzzle.scale * (ltrX + 0.5)),
-      y: Math.floor(puzzle.scale * (ltrY + 0.5)),
+      x: scale * ltrX + offset,
+      y: scale * ltrY + offset,
       fill: fits ? '#AAA' : '#AAA',
       stroke: fits ? 'black' : 'none',
       'stroke-width': fits ? '1px' : '0px',
@@ -99,23 +97,24 @@ const mouseMoveHandler = evt => {
 
   const pld = puzzle.placingData;
   const target = evt.target;
-  if (target === pld.curMouseElem) return;
+  if (target === pld.curElem) return;
 
-  console.log(`mouse move event`);
-  pld.curMouseElem = target;
+  //console.log(`mouse move event`);
+  pld.curElem = target;
   changePlacing(pld);
 };
 
 document.onwheel = evt => {
   if (puzzle.state !== 'placing') return;
-
   const pld = puzzle.placingData;
-  const upDown = Math.sign(evt.deltaY);
-  console.log(`mouse wheel ${upDown === 1 ? 'up' : 'down'} event`);
-  const oldDirNum = directions.indexOf(pld.direction),
-        newDirNum = (oldDirNum + upDown + 8) % 8;
-  pld.direction = directions[newDirNum];
+  if (!pld.wheelPrimed) return;
+
+  const upDown = -Math.sign(evt.deltaY);
+  //console.log(`mouse wheel ${upDown === 1 ? 'up' : 'down'} event`);
+  pld.direction = (pld.direction + upDown + 8) % 8;
   changePlacing(pld);
+  pld.wheelPrimed = false;
+  setTimeout(() => pld.wheelPrimed = true, 150);
 };
 
 const gridClickHandler = evt => {
@@ -139,11 +138,14 @@ const createSearch = () => {
   const hScale = maxSvgWidth / width;
   const vScale = maxSvgHeight / height;
   const scale = puzzle.scale = Math.min(hScale, vScale);
-  console.log('scale: ', scale);
+  puzzle.fontSize = Math.floor(puzzle.scale * 6 / 7);
+  puzzle.offset = Math.floor(puzzle.scale / 2);
+
+  //console.log('scale: ', scale);
 
   const svgWidth = scale * width,
         svgHeight = scale * height;
-  console.log(`svg width: ${svgWidth}, height: ${svgHeight}`);
+  //console.log(`svg width: ${svgWidth}, height: ${svgHeight}`);
   const svg = scr.append('svg').attrs({
     width: svgWidth,
     height: svgHeight,
@@ -176,45 +178,46 @@ const createSearch = () => {
     });
   });
 
-
   const wordList = d3.select(e.wordList);
   puzzle.wordData = params.words.map((word, wordNum) => {
-    const span = wordList.append('span').attrs({
-      id: `word-${wordNum}`,
-      'class': 'word',
-    }).text(word);
-    const ltrElems = word.split('').map((ltr, ltrNum) => {
-      const fontSize = Math.floor(puzzle.scale * 6 / 7);
-      return svg.append('text').attrs({
-        //x: 8 + puzzle.scale * ltrNum,
-        //y: 26 + puzzle.scale * ltrNum,
-        x: -100, y: -100,
-        'font-family': 'courier',
-        'font-size': `${fontSize}px`,
-        'font-weight': 'bold',
-        fill: '#AAA',
-        'text-anchor': 'middle',
-        'alignment-baseline': 'middle',
-      }).text(ltr);
-    });
+    const wordData = {
+      word,
+      span: wordList.append('span').attrs({
+        id: `word-${wordNum}`,
+        'class': 'word',
+      }).text(word),
+      ltrElems: word.split('').map((ltr, ltrNum) => {
+        return svg.append('text').attrs({
+          //x: 8 + puzzle.scale * ltrNum,
+          //y: 26 + puzzle.scale * ltrNum,
+          x: -100, y: -100,
+          'font-family': 'courier',
+          'font-size': `${puzzle.fontSize}px`,
+          'font-weight': 'bold',
+          fill: '#AAA',
+          'text-anchor': 'middle',
+          'alignment-baseline': 'middle',
+        }).text(ltr);
+      }),
+    };
     const initPlacingData = () => {
       return {
-        wordNum,
-        direction: 'E',
-        curMouseElem: null,
+        wordData,
+        direction: 0,
+        curElem: null,
+        wheelPrimed: true,
       };
     };
-    span.node().addEventListener('click', () => {
-      console.log(`click on word #${wordNum}`);
+    wordData.span.node().addEventListener('click', () => {
+      console.log(`click on word "${word}"`);
       if (puzzle.state === 'waiting') {
         puzzle.state = 'placing';
         puzzle.placingData = initPlacingData();
       }
       else if (puzzle.state === 'placing') {
-        const oldWordNum = puzzle.placingData.wordNum;
-        if (wordNum !== oldWordNum) {
-          const oldWord = puzzle.wordData[oldWordNum];
-          oldWord.ltrElems.forEach(ltrElem => {
+        const oldWordData = puzzle.placingData.wordData;
+        if (word !== oldWordData.word) {
+          oldWordData.ltrElems.forEach(ltrElem => {
             ltrElem.attrs({x: -100, y: -100})
           });
           puzzle.placingData = initPlacingData();
@@ -222,11 +225,7 @@ const createSearch = () => {
       }
     });
     wordList.append('br');
-    return {
-      word,
-      span,
-      ltrElems,
-    };
+    return wordData;
   });
 
 };
