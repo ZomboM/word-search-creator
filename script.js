@@ -5,8 +5,7 @@ const maxSvgWidth = 500,
 const puzzle = {
   state: 'wizard',
 };
-// This holds the data given by the user
-const params = {};
+
 
 const getElem = id => document.getElementById(id);
 const elemIds = [
@@ -22,9 +21,15 @@ elemIds.forEach(id => {
   e[id] = getElem(id);
 });
 
-const show = elem => elem.style.display = 'block';
-const hide = elem => elem.style.display = 'none';
-const maxLen = words => Math.max(...words.map(w => w.length));
+const show = elem => {
+  const disp = elem.attr('data-display') || 'block';
+  elem.style.display = disp;
+};
+const hide = elem => {
+  elem.attr('data-display', elem.style.display);
+  elem.style.display = 'none';
+};
+const maxLen = strs => Math.max(...strs.map(w => w.length));
 const range = n => Array(n).fill(0).map((z, i) => i);
 
 const directions = [
@@ -40,15 +45,15 @@ const directions = [
 
 
 // check whether or not a grid square is valid and empty
-const squareEmpty = (ltrX, ltrY) =>
-  ltrX >= 0 && ltrX < params.width &&
-  ltrY >= 0 && ltrY < params.height &&
-  puzzle.grid[ltrX][ltrY].letter === null;
+const squareEmpty = c =>
+  c.x >= 0 && c.x < puzzle.width &&
+  c.y >= 0 && c.y < puzzle.height &&
+  puzzle.grid[c.x][c.y].letter === null;
 
 // check whether or not the current word fits into the grid
 // starting at the current square
 const wordFits = pld => {
-  const ltrElem = pld.curElem;
+  const ltrElem = pld.curSquare;
   const x = ltrElem.getAttribute('data-x') - 0,
         y = ltrElem.getAttribute('data-y') - 0;
   const wordData = pld.wordData,
