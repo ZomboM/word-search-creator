@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Searchy</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id='wizard'>
+      <div id='wiz0'>
+        <p>
+          Please enter your words (separated by spaces or enter):
+        </p>
+        <p>
+          <textarea id='wordsInput' rows='15' cols='45'></textarea>
+        </p>
+      </div>
+      <div id='wiz1' style='display: none'>
+        <p>
+          How big should the word search be?
+        </p>
+        <p>
+          Width: <input id='widthInput' type='text'/>
+        </p>
+        <p>
+          Height: <input id='heightInput' type='text'/>
+        </p>
+      </div>
+      <div id='errorMessage' style='display: none;'></div>
+      <p>
+        <button id='nextButton'>Next >></button>
+      </p>
+    </div>
+    <div id='searchPuzzle' style='display: none'>
+      <div id='screen'></div>
+      <div id='wordList'>
+      </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

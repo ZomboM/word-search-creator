@@ -1,0 +1,26 @@
+#wizard {
+  font-family: Helvetica;
+}
+#wordsInput {
+  font-family: Helvetica;
+}
+#errorMessage {
+  color: red;
+  font-weight: bold;
+  background: #FAA;
+  border: 3px solid grey;
+  border-radius: 5px;
+  padding: 6px;
+}
+#wordList {
+  column-count: 3;
+  font-family: courier;
+  font-weight: bold;
+}
+.word {
+  color: #777;
+}
+.word:hover {
+  cursor: pointer;
+  color: #ffffff;
+}
