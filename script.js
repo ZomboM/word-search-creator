@@ -1,4 +1,4 @@
-const maxSvgWidth = 450,
+const maxSvgWidth = 500,
       maxSvgHeight = 350;
 
 
@@ -84,8 +84,8 @@ const changePlacing = pld => {
     const ltrX = x + ltrNum * dx;
     const ltrY = y + ltrNum * dy;
     ltrElem.attrs({
-      x: 8 + puzzle.scale * ltrX,
-      y: 26 + puzzle.scale * ltrY,
+      x: Math.floor(puzzle.scale * (ltrX + 0.5)),
+      y: Math.floor(puzzle.scale * (ltrY + 0.5)),
       fill: fits ? '#AAA' : '#AAA',
       stroke: fits ? 'black' : 'none',
       'stroke-width': fits ? '1px' : '0px',
@@ -122,7 +122,7 @@ const gridClickHandler = evt => {
   if (puzzle.state !== 'placing') return;
   const pld = puzzle.placingData;
   if (!wordFits(pld)) return;
-
+  
 }
 
 // The main "create word search" function -- this must come
@@ -184,14 +184,17 @@ const createSearch = () => {
       'class': 'word',
     }).text(word);
     const ltrElems = word.split('').map((ltr, ltrNum) => {
+      const fontSize = Math.floor(puzzle.scale * 6 / 7);
       return svg.append('text').attrs({
         //x: 8 + puzzle.scale * ltrNum,
         //y: 26 + puzzle.scale * ltrNum,
         x: -100, y: -100,
         'font-family': 'courier',
-        'font-size': '30px',
+        'font-size': `${fontSize}px`,
         'font-weight': 'bold',
         fill: '#AAA',
+        'text-anchor': 'middle',
+        'alignment-baseline': 'middle',
       }).text(ltr);
     });
     const initPlacingData = () => {
@@ -293,9 +296,9 @@ const skipWiz = () => {
   hide(e.wizard);
   show(e.screen);
   Object.assign(params, {
-    words: ['A', 'B', 'C', 'DEATH', 'YAY', 'BOOKY', 'ENSKCWNNCNJDJNDNASS'],
-    width: 'blue',
-    height: 100,
+    words: ['A', 'B', 'C', 'DEATH', 'YAY', 'BOOK', 'INSANITY','IMPOSSIBILITY'],
+    width: 10,
+    height: 20,
   });
   createSearch();
 };
