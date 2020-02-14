@@ -1,10 +1,10 @@
 #wizard {
   font-family: Helvetica;
 }
-#wordsInput {
+#wwords {
   font-family: Helvetica;
 }
-#errorMessage {
+#werror {
   color: red;
   font-weight: bold;
   background: #FAA;
@@ -12,15 +12,28 @@
   border-radius: 5px;
   padding: 6px;
 }
-#wordList {
+#words {
   column-count: 3;
   font-family: courier;
-  font-weight: bold;
 }
 .word {
   color: #777;
 }
+.placing {
+  font-weight: bold;
+  color: blue;
+}
 .word:hover {
   cursor: pointer;
   color: black;
+}
+
+.square {
+  fill: '#AAA';
+  stroke: 'none';
+}
+.fits {
+  fill: 'red';
+  stroke: 'black';
+  stroke-width: '0.3px';
 }

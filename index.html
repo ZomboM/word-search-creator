@@ -8,38 +8,47 @@
   </head>
   <body>
     <div id='wizard'>
-      <div id='wiz0'>
+      <div id='wpage0'>
         <p>
           Please enter your words:
         </p>
         <p>
-          <textarea id='wordsInput' rows='15' cols='45'></textarea>
+          <textarea id='wwords' rows='15' cols='45'></textarea>
         </p>
       </div>
-      <div id='wiz1' style='display: none'>
+      <div id='wpage1' style='display: none'>
         <p>
-          How big should the word search be?
+          How big will the puzzle be?
         </p>
         <p>
-          Width: <input id='widthInput' type='text'/>
+          Width: <input id='wwidth' type='text'/>
         </p>
         <p>
-          Height: <input id='heightInput' type='text'/>
+          Height: <input id='wheight' type='text'/>
         </p>
       </div>
-      <div id='errorMessage' style='display: none;'></div>
       <p>
-        <button id='nextButton'>Next >></button>
+        <button id='wnext'>Next >></button>
       </p>
+      <div id='werror' style='display: none;'></div>
     </div>
-    <div id='searchPuzzle' style='display: none'>
-      <div id='screen'></div>
-      <div id='wordList'>
-      </div>
+
+
+
+    <div id='puzzle' style='display: none'>
+      <div id='board'></div>
+      <div id='words'></div>
     </div>
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+
+    <script src='utils.js'></script>
+    <script src='wizard.js'></script>
     <script src="script.js"></script>
+
+    <script>
+      wizard();
+    </script>
   </body>
 </html>
