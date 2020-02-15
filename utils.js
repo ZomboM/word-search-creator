@@ -12,6 +12,6 @@ const subsetMatch = (a, b) =>
 
 const addClass = (elem, cls) => elem.node().classList.add(cls);
 const removeClass = (elem, cls) => {
-  console.log('removeClass, elem: ', elem.node());
+  //console.log('removeClass, elem: ', elem.node());
   elem.node().classList.remove(cls);
 };

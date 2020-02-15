@@ -15,9 +15,9 @@ const maxSvgWidth = 500,
       maxSvgHeight = 350;
 
 const puzzle = {
-  cols: 5,
-  rows: 5,
-  words: ['a', 'bed', 'cappy'],
+  cols: 30,
+  rows: 30,
+  words: constellations,
 };
 
 const {cols, rows, words} = puzzle;
@@ -136,7 +136,7 @@ const wordList = words.map((text, wordNum) => {
   word.letters = text.split('').map((ltr, ltrNum) => {
     const g = board.append('g').attr('transform', 'translate(0, 0)');
     const elem = g.append('text').attrs({
-      x: 5, y: 6,
+      x: 5, y: 5,
       'font-family': 'courier',
       'font-size': `10px`,
       'font-weight': 'bold',
@@ -161,7 +161,7 @@ let placingWord = null;
 
 const clearPlacingWord = () => {
   if (placingWord === null) return;
-  placingWord.state = 'unplaced';
+  if (placingWord.state === 'placing') placingWord.state = 'unplaced';
   placingWord = null;
 };
 
@@ -215,9 +215,21 @@ const mouseMoveHandler = evt => {
   const [c, r] = boxId.substr(3).split('-').map(toInt);
   movePlacing(c, r);
 };
-const gridClickHandler = evt => {
 
+const gridClickHandler = evt => {
+  console.log('gridClickHandler');
+  if (placingWord === null) return;
+  if (!placingWord.fits) return;
+  placingWord.letters.forEach((letter, n) => {
+    const [c, r] = placingWord.ltrPos(n);
+    grid[c][r].letter = letter.ltr;
+    letter.elem.attr('opacity', 1);
+  });
+
+  placingWord.state = 'placed';
+  clearPlacingWord();
 };
+
 grid.forEach(row => row.forEach(sq => {
   sq.box.node().addEventListener('mousemove', mouseMoveHandler);
   sq.box.node().addEventListener('click', gridClickHandler);
@@ -233,6 +245,8 @@ document.onwheel = evt => {
   wheelReady = false;
   setTimeout(() => wheelReady = true, 150);
 };
+
+
 
 
 setPlacingWord(wordList[0]);
