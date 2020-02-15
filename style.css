@@ -16,24 +16,62 @@
   column-count: 3;
   font-family: courier;
 }
-.word {
-  color: #777;
-}
-.placing {
-  font-weight: bold;
-  color: blue;
-}
-.word:hover {
-  cursor: pointer;
-  color: black;
+
+#board {
+  margin-bottom: 1em;
 }
 
-.square {
-  fill: '#AAA';
-  stroke: 'none';
+span.word {
+  display: inline-block;
+  margin: 0em;
+  padding: 3px 8px;
+  border: 2px white;
+  border-radius: 3px;
 }
-.fits {
-  fill: 'red';
-  stroke: 'black';
-  stroke-width: '0.3px';
+span.unplaced {
+  font-weight: normal;
+  color: #AAA;
+}
+span.placing {
+  font-weight: bold;
+  color: #777;
+  border: 2px ridge gold;
+  border-radius: 3px;
+}
+span.placed {
+  font-weight: bold;
+  color: black;
+  text-decoration: line-through;
+}
+span.word:hover {
+  cursor: pointer;
+}
+
+text {
+  stroke: none;
+}
+text.unplaced {
+  opacity: 0;
+  fill: #AAA;
+}
+text.offboard {
+  opacity: 0;
+  fill: pink;
+}
+text.nofit {
+  opacity: 0.6;
+  fill: red;
+  /*stroke: none;*/
+}
+text.fits {
+  opacity: 0.6;
+  fill: green;
+  /*stroke: #080;
+  stroke-width: 0.3px;*/
+}
+text.placed {
+  opacity: 1;
+  fill: black;
+  /*stroke: black;
+  stroke-width: 0.3px;*/
 }

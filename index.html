@@ -7,7 +7,7 @@
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <div id='wizard'>
+    <div id='wizard' style='display: none;'>
       <div id='wpage0'>
         <p>
           Please enter your words:
@@ -40,12 +40,12 @@
       <div id='words'></div>
     </div>
 
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+    <script src='../lib/d3/d3.v5.min.js'></script>
+    <script src='../lib/d3/d3-selection-multi.v1.min.js'></script>
 
     <script src='utils.js'></script>
     <script src='wizard.js'></script>
-    <script src="script.js"></script>
+    <script src='script.js'></script>
 
     <script>
       wizard();
