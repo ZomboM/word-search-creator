@@ -23,23 +23,22 @@
 
 span.word {
   display: inline-block;
+  font-weight: bold;
   margin: 0em;
   padding: 3px 8px;
-  border: 2px white;
+  border: 2px;
   border-radius: 3px;
 }
 span.unplaced {
-  font-weight: normal;
   color: #AAA;
 }
 span.placing {
-  font-weight: bold;
   color: #777;
+/*
   border: 2px ridge gold;
-  border-radius: 3px;
+  border-radius: 3px; */
 }
 span.placed {
-  font-weight: bold;
   color: black;
   text-decoration: line-through;
 }
@@ -49,6 +48,7 @@ span.word:hover {
 
 text {
   stroke: none;
+  pointer-events: none;
 }
 text.unplaced {
   opacity: 0;

@@ -11,13 +11,13 @@ const [puzzleDiv, boardDiv, wordsDiv] =
   ['puzzle', 'board', 'words'].map(id => d3.select('#' + id));
 puzzleDiv.style('display', 'block');
 
-const maxSvgWidth = 500,
-      maxSvgHeight = 350;
+const maxSvgWidth = 600,
+      maxSvgHeight = 400;
 
 const puzzle = {
-  cols: 30,
-  rows: 30,
-  words: constellations,
+  cols: 15,
+  rows: 15,
+  words: constellations.slice(0, 10),
 };
 
 const {cols, rows, words} = puzzle;
@@ -52,9 +52,11 @@ const grid = range(cols).map(col =>
       col, row,
       g, box,
       letter: null,
+      wordCount: 0,
     };
   })
 );
+const squares = [].concat(...grid);
 
 const validPos = (c, r) => c >= 0 && c < cols && r >= 0 && r < rows;
 
@@ -65,8 +67,6 @@ const goodSquare = (c, r, ltr) => {
   const gridLtr = grid[c][r].letter;
   return gridLtr === null || gridLtr === ltr;
 };
-
-
 
 const directions = [
   [  1,  0 ],  // east
@@ -103,7 +103,7 @@ const wordList = words.map((text, wordNum) => {
     listSpan: wordsDiv.append('span')
       .attrs({
         'id': `word${wordNum}`,
-        'class': 'word',
+        'class': 'word unplaced',
       })
       .text(text),
 
@@ -151,10 +151,62 @@ const wordList = words.map((text, wordNum) => {
       g, elem,
     };
   });
-
   return word;
 });
 
+const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+const randomLetter = (() => {
+  const allLetters = alphabet + wordList.map(w => w.text).join(''),
+        num = allLetters.length;
+  return () => allLetters.charAt(Math.floor(num * Math.random()));
+})();
+
+const checkDone = () => {
+  if (wordList.every(w => w.state === 'placed')) {
+    squares.forEach(sq => {
+      if (sq.letter === null) {
+        const ltr = sq.letter = randomLetter();
+        const {col, row} = sq;
+        const g = board.append('g').attr('transform',
+          `translate(${10*col} ${10*row})`);
+        const elem = g.append('text').attrs({
+          x: 5, y: 5,
+          'font-family': 'courier',
+          'font-size': `10px`,
+          'font-weight': 'bold',
+          'text-anchor': 'middle',
+          'alignment-baseline': 'middle',
+          opacity: 1,
+        });
+        elem.text(ltr);
+      }
+    });
+  }
+};
+
+const placeWord = () => {
+  const w = placingWord;
+  if (w === null || !w.fits) return;
+  w.letters.forEach((letter, n) => {
+    const [c, r] = w.ltrPos(n),
+          sq = grid[c][r];
+    sq.letter = letter.ltr;
+    sq.wordCount++;
+    letter.elem.attr('opacity', 1);
+  });
+  w.state = 'placed';
+  clearPlacingWord();
+  checkDone();
+};
+const unplaceWord = w => {
+  w.letters.forEach((letter, n) => {
+    const [c, r] = w.ltrPos(n),
+          sq = grid[c][r];
+    sq.wordCount--;
+    if (sq.wordCount === 0) sq.letter = null;
+    letter.elem.attr('opacity', 0);
+  });
+};
 
 
 let placingWord = null;
@@ -167,6 +219,8 @@ const clearPlacingWord = () => {
 
 const setPlacingWord = word => {
   if (word === placingWord) return;
+  // if the word's state was 'placed', then we need to remove it from the grid
+  if (word.state === 'placed') unplaceWord(word);
   clearPlacingWord();
   Object.assign(word, {
     col: -1, row: -1, dir: 0,
@@ -217,26 +271,31 @@ const mouseMoveHandler = evt => {
 };
 
 const gridClickHandler = evt => {
-  console.log('gridClickHandler');
-  if (placingWord === null) return;
-  if (!placingWord.fits) return;
-  placingWord.letters.forEach((letter, n) => {
-    const [c, r] = placingWord.ltrPos(n);
-    grid[c][r].letter = letter.ltr;
-    letter.elem.attr('opacity', 1);
-  });
-
-  placingWord.state = 'placed';
-  clearPlacingWord();
+  placeWord();
 };
 
-grid.forEach(row => row.forEach(sq => {
+let wheelReady = true;   // throttle
+const gridWheelHandler = evt => {
+  if (placingWord === null) return;
+  evt.preventDefault();
+  if (!wheelReady) return;
+  const upDown = -Math.sign(evt.deltaY);
+  turnPlacing((placingWord.dir + upDown + 8) % 8);
+  wheelReady = false;
+  setTimeout(() => wheelReady = true, 150);
+};
+
+squares.forEach(sq => {
   sq.box.node().addEventListener('mousemove', mouseMoveHandler);
   sq.box.node().addEventListener('click', gridClickHandler);
-}));
+  sq.box.node().addEventListener('wheel', gridWheelHandler);
+});
 
+/*
 let wheelReady = true;   // throttle
 document.onwheel = evt => {
+  evt.preventDefault();
+  window.wheelEvent = evt;
   if (!wheelReady) return;
   const upDown = -Math.sign(evt.deltaY);
   //console.log(`mouse wheel ${upDown === 1 ? 'up' : 'down'} event`);
@@ -245,6 +304,7 @@ document.onwheel = evt => {
   wheelReady = false;
   setTimeout(() => wheelReady = true, 150);
 };
+*/
 
 
 
